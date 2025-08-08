@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Tracker</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+
+<body>
+    <div class="navbar">
+        <div class="user-info">
+            <span class="user-icon">&#128100;</span>
+            <div>
+                <div class="user-name">User</div>
+                <div class="user-email">gmail.com</div>
+            </div>
+            <span class="dropdown-icon">&#9660;</span>
+        </div>
+        <span class="settings-icon">&#9881;</span>
+    </div>
+    <div class="container">
+        <div class="main-content">
+            <h1>Expense Tracker</h1>
+            <div class="summary-cards">
+                <div class="summary-card day">
+                    <div class="amount" id="amount-day"></div>
+                    <div class="label">Day</div>
+                </div>
+                <div class="summary-card month">
+                    <div class="amount" id="amount-month"></div>
+                    <div class="label">Month</div>
+                </div>
+                <div class="summary-card year">
+                    <div class="amount" id="amount-year"></div>
+                    <div class="label">Year</div>
+                </div>
+            </div>
+            <div class="tabs">
+                <button class="tab active" id="expense-tab">Expenses</button>
+                <button class="tab" id="income-tab">Income</button>
+                <div class="filters">
+                    <select class="date-select" id="date-select">
+                        <option>Today</option>
+                        <option>Yesterday</option>
+                        <option>Last 7 Days</option>
+                        <option>Last 30 Days</option>
+                    </select>
+                    <select class="month-select" id="month-select">
+                        <option>January</option>
+                        <option>February</option>
+                        <option>March</option>
+                        <option>April</option>
+                        <option>May</option>
+                        <option>June</option>
+                        <option>July</option>
+                        <option>August</option>
+                        <option>September</option>
+                        <option>October</option>
+                        <option>November</option>
+                        <option>December</option>
+                    </select>
+                    <select class="year-select" id="year-select">
+                        <option>2025</option>
+                    </select>
+                    <select class="tag-select-expense" id="tag-select-expense">
+                        <option>All Tags</option>
+                        <option>Home</option>
+                        <option>Food</option>
+                        <option>Shopping</option>
+                        <option>Other</option>
+                    </select>
+                    <select class="tag-select-income" id="tag-select-income">
+                        <option>All Tags</option>
+                        <option>Salary</option>
+                        <option>Freelance</option>
+                        <option>Gift</option>
+                        <option>Other</option>
+                    </select>
+                </div>
+            </div>
+            <div class="expense-list" id="expense-list">
+            </div>
+            <div class="income-list" id="income-list">
+            </div>
+
+        </div>
+        <div class="side-panel">
+            <div class="side-header">
+                <div class="side-month" id="side-month"></div>
+                <div class="side-date" id="side-date"></div>
+                <div class="side-balance"></div>
+                <div class="side-balance-label">Current Money</div>
+            </div>
+            <div class="side-gain-loss">
+                <div class="gain">
+                    <div class="label">Gain</div>
+                    <div class="amount" id="gain-amount"></div>
+                </div>
+                <div class="loss">
+                    <div class="label">Loss</div>
+                    <div class="amount" id="loss-amount"></div>
+                </div>
+            </div>
+            <div class="side-tabs">
+                <button class="tab active" id="side-expense-tab">Expenses</button>
+                <button class="tab" id="side-income-tab">Income</button>
+            </div>
+            <div class="side-expense-list" id="side-expense-list">
+                <div class="side-expense-header-row">
+                    <span class="side-expense-header-tag">Tag</span>
+                    <span class="side-expense-header-amount">Amount</span>
+                </div>
+                <div class="side-expense-item">
+                    <div class="side-expense-icon home">
+                        <span>&#8962;</span>
+                    </div>
+                    <div class="side-expense-details">
+                        <div class="side-expense-title" id="side-expense-title">Select Tag</div>
+                        <div class="side-expense-sub" id="side-expense-sub">Note</div>
+                    </div>
+                    <div class="side-expense-amount" id="side-expense-amount">0</div>
+                    <div class="side-expense-menu">&#8942;</div>
+                </div>
+                <form class="side-expense-form" style="display:none;" id="side-expense-form">
+                    <div class="side-expense-form-row">
+                        <select class="side-tag-select" name="side-tag-select">
+                            <option>Select Tag</option>
+                            <option>Home</option>
+                            <option>Food</option>
+                            <option>Shopping</option>
+                            <option>Other</option>
+                        </select>
+                        <input type="number" class="side-amount-input" name="side-amount-input" placeholder="Add Amount" min="0" step="1" />
+                    </div>
+                    <textarea class="side-note-input" name="side-note-input" placeholder="Note"></textarea>
+                    <div class="side-expense-form-actions">
+                        <button type="button" class="side-add-more-btn"><span class="add-icon">&#8592;</span> Back</button>
+                        <button type="submit" class="side-save-btn" id="side-save-expense-btn"><span class="save-icon">&#10003;</span> Save</button>
+                    </div>
+                </form>
+                <button type="button" class="side-add-expense-btn">
+                    <span class="add-icon">&#43;</span> Add Transaction
+                </button>
+            </div>
+            <div class="side-income-list" id="side-income-list">
+                <div class="side-income-header-row">
+                    <span class="side-income-header-tag">Tag</span>
+                    <span class="side-eincome-header-amount">Amount</span>
+                </div>
+                <div class="side-income-item">
+                    <div class="side-income-icon home">
+                        <span>&#8962;</span>
+                    </div>
+                    <div class="side-income-details">
+                        <div class="side-income-title" id="side-income-title">Select Tag</div>
+                        <div class="side-income-sub" id="side-income-sub">Note</div>
+                    </div>
+                    <div class="side-income-amount" id="side-income-amount">0</div>
+                    <div class="side-income-menu">&#8942;</div>
+                </div>
+                <form class="side-income-form" style="display:none;" id="side-income-form">
+                    <div class="side-income-form-row">
+                        <select class="side-tag-select" name="side-tag-select">
+                            <option>Select Tag</option>
+                            <option>Salary</option>
+                            <option>Gift</option>
+                            <option>Freelance</option>
+                            <option>Other</option>
+                        </select>
+                        <input type="number" class="side-amount-input" name="side-amount-input" placeholder="Add Amount" min="0" step="1" />
+                    </div>
+                    <textarea class="side-note-input" name="side-note-input" placeholder="Note"></textarea>
+                    <div class="side-income-form-actions">
+                        <button type="button" class="side-add-more-btn"><span class="add-icon">&#8592;</span> Back</button>
+                        <button type="submit" class="side-save-btn" id="side-save-income-btn"><span class="save-icon">&#10003;</span> Save</button>
+                    </div>
+                </form>
+                <button type="button" class="side-add-income-btn">
+                    <span class="add-icon">&#43;</span> Add Transaction
+                </button>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -813,9 +813,12 @@ h1 {
         flex-direction: column;
         gap: 16px;
     }
-    .filters {
-        gap: 8px;
-        flex-direction: column;
-    }
 }
 
+@media (max-width: 600px) {
+    .filters {
+       flex-direction: column;
+       gap: 8px;
+       padding: 0 8px;
+    }
+}

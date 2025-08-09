@@ -120,7 +120,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const sideIncomeForm = document.getElementById('side-income-form');
     const incomeList = document.getElementById('income-list');
 
-    // โหลดข้อมูลรายรับจาก LocalStorage
     let incomes = JSON.parse(localStorage.getItem('incomes')) || [];
     renderIncomes();
 
@@ -141,14 +140,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
 
-            // เก็บวันที่บันทึก
             const dateSaved = new Date();
             const dateString = dateSaved.toLocaleDateString('th-TH', {
                 year: 'numeric', month: 'short', day: 'numeric'
             });
 
-            // เก็บข้อมูลใน Array แล้วบันทึก LocalStorage
+            // สร้าง ID แบบง่าย ๆ ด้วย timestamp
             const incomeData = { 
+                id: Date.now(), 
                 tag, 
                 amount: parseFloat(amount).toFixed(2), 
                 note, 
@@ -157,34 +156,32 @@ document.addEventListener('DOMContentLoaded', function () {
             incomes.push(incomeData);
             localStorage.setItem('incomes', JSON.stringify(incomes));
 
-            // แสดงรายการใหม่
             renderIncomes();
 
-            // รีเซ็ตฟอร์ม
             tagSelect.selectedIndex = 0;
             amountInput.value = '';
             noteInput.value = '';
             sideIncomeForm.style.display = 'none';
 
-            // อัปเดตสรุปรายรับ/รายจ่าย
             updateGainLoss();
         });
 
-        // แสดงฟอร์มเมื่อคลิก Add Transaction
         const addIncomeBtn = document.querySelector('.side-add-income-btn');
         if (addIncomeBtn) {
             addIncomeBtn.addEventListener('click', function () {
                 sideIncomeForm.style.display = 'block';
             });
+
         }
     }
 
-    // ฟังก์ชันแสดงรายรับจาก LocalStorage
     function renderIncomes() {
         incomeList.innerHTML = '';
         incomes.forEach(item => {
             const div = document.createElement('div');
             div.className = 'income-item';
+            div.dataset.id = item.id; // เก็บ id ไว้ใน attribute
+
             div.innerHTML = `
                 <div class="income-icon ${item.tag.toLowerCase()}">
                     <span>${item.tag === 'Salary' ? '&#128188;' : item.tag === 'Freelance' ? '&#128187;' : item.tag === 'Gift' ? '&#127873;' : '&#128176;'}</span>
@@ -195,13 +192,29 @@ document.addEventListener('DOMContentLoaded', function () {
                     <div class="income-date">${item.date}</div>
                 </div>
                 <div class="income-amount">
-                    <div>${item.amount}</div>
+                    <div>${Number(item.amount).toLocaleString('en-US')}</div>
                     <div class="income-trans">1 Transaction</div>
                 </div>
-                <div class="income-menu">&#8942;</div>
+                <button class="income-delete-btn" title="Delete">&#10060;</button>
             `;
+
             incomeList.appendChild(div);
+
+            // ผูก event ปุ่มลบ
+            const deleteBtn = div.querySelector('.income-delete-btn');
+            deleteBtn.addEventListener('click', () => {
+                deleteIncome(item.id);
+            });
         });
+    }
+
+    function deleteIncome(id) {
+        // กรอง array ออกเฉพาะที่ไม่ใช่ id ที่ลบ
+        incomes = incomes.filter(item => item.id !== id);
+        localStorage.setItem('incomes', JSON.stringify(incomes));
+        renderIncomes();
+        updateGainLoss();
+        updateExpenseSummary();
     }
 });
 
@@ -210,7 +223,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const sideExpenseForm = document.getElementById('side-expense-form');
     const expenseList = document.getElementById('expense-list');
 
-    // โหลดข้อมูลจาก LocalStorage
     let expenses = JSON.parse(localStorage.getItem('expenses')) || [];
     renderExpenses();
 
@@ -231,49 +243,50 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
 
-            // เก็บวันที่บันทึก
             const dateSaved = new Date();
             const dateString = dateSaved.toLocaleDateString('th-TH', {
                 year: 'numeric', month: 'short', day: 'numeric'
             });
 
-            // เก็บข้อมูลใน Array แล้วบันทึก LocalStorage
-            const expenseData = { tag, amount: parseFloat(amount).toFixed(2), note, date: dateString };
+            const expenseData = {
+                id: Date.now(),
+                tag,
+                amount: parseFloat(amount).toFixed(2),
+                note,
+                date: dateString
+            };
             expenses.push(expenseData);
             localStorage.setItem('expenses', JSON.stringify(expenses));
 
-            // แสดงรายการใหม่
             renderExpenses();
 
-            // Reset form
             tagSelect.selectedIndex = 0;
             amountInput.value = '';
             noteInput.value = '';
             sideExpenseForm.style.display = 'none';
 
-            // Update summary
-            updateExpenseSummary();
             updateGainLoss();
+            updateExpenseSummary();
         });
 
-        // ปุ่มแสดงฟอร์ม
-        const addTransactionBtn = document.querySelector('.side-add-transaction-btn');
-        if (addTransactionBtn) {
-            addTransactionBtn.addEventListener('click', function () {
+        const addExpenseBtn = document.querySelector('.side-add-expense-btn');
+        if (addExpenseBtn) {
+            addExpenseBtn.addEventListener('click', function () {
                 sideExpenseForm.style.display = 'block';
             });
         }
     }
 
-    // ฟังก์ชันแสดงรายการจาก LocalStorage
     function renderExpenses() {
         expenseList.innerHTML = '';
         expenses.forEach(item => {
             const div = document.createElement('div');
             div.className = 'expense-item';
+            div.dataset.id = item.id;
+
             div.innerHTML = `
                 <div class="expense-icon ${item.tag.toLowerCase()}">
-                    <span>${item.tag === 'Home' ? '&#8962;' : item.tag === 'Food' ? '&#127828;' : item.tag === 'Shopping' ? '&#128722;' : '&#128176;'}</span>
+                    <span>${item.tag === 'Home' ? '&#8962;' : item.tag === 'Food' ? '&#127828;' : item.tag === 'Shopping' ? '&#128722;' : '&#128200;'}</span>
                 </div>
                 <div class="expense-details">
                     <div class="expense-title">${item.tag}</div>
@@ -281,15 +294,30 @@ document.addEventListener('DOMContentLoaded', function () {
                     <div class="expense-date">${item.date}</div>
                 </div>
                 <div class="expense-amount">
-                    <div>${item.amount}</div>
+                    <div>${Number(item.amount).toLocaleString('en-US')}</div>
                     <div class="expense-trans">1 Transaction</div>
                 </div>
-                <div class="expense-menu">&#8942;</div>
+                <button class="expense-delete-btn" title="Delete">&#10060;</button>
             `;
+
             expenseList.appendChild(div);
+
+            const deleteBtn = div.querySelector('.expense-delete-btn');
+            deleteBtn.addEventListener('click', () => {
+                deleteExpense(item.id);
+            });
         });
     }
+
+    function deleteExpense(id) {
+        expenses = expenses.filter(item => item.id !== id);
+        localStorage.setItem('expenses', JSON.stringify(expenses));
+        renderExpenses();
+        updateGainLoss();
+        updateExpenseSummary();
+    }
 });
+
 
 // Real-time update of note to #side-expense-sub, tag to #side-expense-title, and amount to #side-expense-amount
 document.addEventListener('DOMContentLoaded', function() {
@@ -301,12 +329,19 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    const tagSelect = document.querySelector('.side-tag-select');
+    const tagSelect = document.querySelector('.side-expense-form select.side-tag-select');
     const titleDisplay = document.getElementById('side-expense-title');
+
     if (tagSelect && titleDisplay) {
+        // ตอนโหลด ถ้ายังไม่ได้เลือกอะไร ให้แสดง empty
+        if (tagSelect.value === '') {
+            titleDisplay.textContent = '';
+        } else {
+            titleDisplay.textContent = tagSelect.value;
+        }
+
         tagSelect.addEventListener('change', function() {
-            // Don't show 'Select Tag' as a title
-            titleDisplay.textContent = tagSelect.value === 'Select Tag' ? '' : tagSelect.value;
+            titleDisplay.textContent = tagSelect.value;
         });
     }
 
@@ -318,6 +353,41 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+// Real-time update of note to #side-income-sub, tag to #side-expense-title, and amount to #side-expense-amount
+document.addEventListener('DOMContentLoaded', function() {
+    const noteInput = document.querySelector('.side-income-form .side-note-input');
+    const subDisplay = document.getElementById('side-income-sub');
+    if (noteInput && subDisplay) {
+        noteInput.addEventListener('input', function() {
+            subDisplay.textContent = noteInput.value;
+        });
+    }
+
+    const tagSelect = document.querySelector('.side-income-form select.side-tag-select');
+    const titleDisplay = document.getElementById('side-income-title');
+
+    if (tagSelect && titleDisplay) {
+        // ตอนโหลด ถ้ายังไม่ได้เลือกอะไร ให้แสดง empty
+        if (tagSelect.value === '') {
+            titleDisplay.textContent = '';
+        } else {
+            titleDisplay.textContent = tagSelect.value;
+        }
+
+        tagSelect.addEventListener('change', function() {
+            titleDisplay.textContent = tagSelect.value;
+        });
+    }
+
+    const amountInput = document.querySelector('.side-income-form input.side-amount-input');
+    const amountDisplay = document.getElementById('side-income-amount');
+    if (amountInput && amountDisplay) {
+        amountInput.addEventListener('input', function() {
+            amountDisplay.textContent = amountInput.value;
+        });
+    }
+});
+
 // Side Expense List Toggle
 document.addEventListener('DOMContentLoaded', function() {
     const addTransBtn = document.querySelector('.side-add-expense-btn');
@@ -442,12 +512,18 @@ function updateExpenseSummary() {
     const expenseAmountEls = document.querySelectorAll('.expense-amount > div:first-child');
     let total = 0;
     expenseAmountEls.forEach(el => {
-        const val = parseFloat(el.textContent);
+        const val = parseFloat(el.textContent.replace(/,/g, '')); // ลบ comma ก่อน
         if (!isNaN(val)) total += val;
     });
-    document.getElementById('amount-day').textContent = total.toFixed(2);
-    document.getElementById('amount-month').textContent = total.toFixed(2);
-    document.getElementById('amount-year').textContent = total.toFixed(2);
+
+    const formattedTotal = total.toLocaleString('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    });
+
+    document.getElementById('amount-day').textContent = formattedTotal;
+    document.getElementById('amount-month').textContent = formattedTotal;
+    document.getElementById('amount-year').textContent = formattedTotal;
 }
 
 // Update Gain / Loss and Current Money
@@ -456,7 +532,7 @@ function updateGainLoss() {
     const incomeAmountEls = document.querySelectorAll('#income-list .income-amount > div:first-child');
     let totalIncome = 0;
     incomeAmountEls.forEach(el => {
-        const val = parseFloat(el.textContent);
+        const val = parseFloat(el.textContent.replace(/,/g, ''));
         if (!isNaN(val)) totalIncome += val;
     });
 
@@ -464,19 +540,19 @@ function updateGainLoss() {
     const expenseAmountEls = document.querySelectorAll('#expense-list .expense-amount > div:first-child');
     let totalExpense = 0;
     expenseAmountEls.forEach(el => {
-        const val = parseFloat(el.textContent);
+        const val = parseFloat(el.textContent.replace(/,/g, ''));
         if (!isNaN(val)) totalExpense += val;
     });
 
     // Update Gain / Loss
     const gainEl = document.getElementById('gain-amount');
     const lossEl = document.getElementById('loss-amount');
-    if (gainEl) gainEl.textContent = totalIncome.toFixed(2);
-    if (lossEl) lossEl.textContent = totalExpense.toFixed(2);
+    if (gainEl) gainEl.textContent = totalIncome.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    if (lossEl) lossEl.textContent = totalExpense.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
 
     // Update Current Money
     const balanceEl = document.querySelector('.side-balance');
-    if (balanceEl) balanceEl.textContent = (totalIncome - totalExpense).toFixed(2);
+    if (balanceEl) balanceEl.textContent = (totalIncome - totalExpense).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
 }
 
 // Run first time when page loads

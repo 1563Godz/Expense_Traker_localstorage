@@ -815,6 +815,7 @@ h1 {
     }
     .filters {
         gap: 8px;
-        padding: 0 12px;
+        flex-direction: column;
     }
 }
+

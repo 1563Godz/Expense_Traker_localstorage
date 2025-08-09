@@ -1,3 +1,20 @@
+// Dropdown menu
+document.addEventListener('DOMContentLoaded', function () {
+    const userInfo = document.getElementById('userInfo');
+    const dropdownMenu = document.getElementById('dropdownMenu');
+
+    userInfo.addEventListener('click', () => {
+        dropdownMenu.classList.toggle('show');
+    });
+
+    // ปิดเมนูเมื่อคลิกนอกพื้นที่
+    document.addEventListener('click', (e) => {
+        if (!userInfo.contains(e.target) && !dropdownMenu.contains(e.target)) {
+            ddropdownMenu.classList.remove('show');
+        }
+    });
+});
+
 //tabs menu
 document.addEventListener('DOMContentLoaded', function () {
     // ตั้งค่าเริ่มต้น
@@ -101,10 +118,13 @@ document.addEventListener("DOMContentLoaded", function () {
 // Handle side income form submission and add to income-list
 document.addEventListener('DOMContentLoaded', function () {
     const sideIncomeForm = document.getElementById('side-income-form');
-    const sideSaveIncomeBtn = document.getElementById('side-save-income-btn');
     const incomeList = document.getElementById('income-list');
 
-    if (sideIncomeForm && sideSaveIncomeBtn && incomeList) {
+    // โหลดข้อมูลรายรับจาก LocalStorage
+    let incomes = JSON.parse(localStorage.getItem('incomes')) || [];
+    renderIncomes();
+
+    if (sideIncomeForm && incomeList) {
         sideIncomeForm.addEventListener('submit', function (e) {
             e.preventDefault();
 
@@ -121,33 +141,32 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
 
-            // สร้างรายการ income ใหม่
-            const item = document.createElement('div');
-            item.className = 'income-item';
-            item.innerHTML = `
-                <div class="income-icon ${tag.toLowerCase()}">
-                    <span>${tag === 'Salary' ? '&#128188;' : tag === 'Freelance' ? '&#128187;' : tag === 'Gift' ? '&#127873;' : '&#128176;'}</span>
-                </div>
-                <div class="income-details">
-                    <div class="income-title">${tag}</div>
-                    <div class="income-sub">${note ? note : ''}</div>
-                </div>
-                <div class="income-amount">
-                    <div>${parseFloat(amount).toFixed(2)}</div>
-                    <div class="income-trans">1 Transaction</div>
-                </div>
-                <div class="income-menu">&#8942;</div>
-            `;
+            // เก็บวันที่บันทึก
+            const dateSaved = new Date();
+            const dateString = dateSaved.toLocaleDateString('th-TH', {
+                year: 'numeric', month: 'short', day: 'numeric'
+            });
 
-            incomeList.appendChild(item);
+            // เก็บข้อมูลใน Array แล้วบันทึก LocalStorage
+            const incomeData = { 
+                tag, 
+                amount: parseFloat(amount).toFixed(2), 
+                note, 
+                date: dateString 
+            };
+            incomes.push(incomeData);
+            localStorage.setItem('incomes', JSON.stringify(incomes));
+
+            // แสดงรายการใหม่
+            renderIncomes();
 
             // รีเซ็ตฟอร์ม
-            if (tagSelect) tagSelect.selectedIndex = 0;
-            if (amountInput) amountInput.value = '';
-            if (noteInput) noteInput.value = '';
+            tagSelect.selectedIndex = 0;
+            amountInput.value = '';
+            noteInput.value = '';
             sideIncomeForm.style.display = 'none';
 
-            // อัปเดตสรุปรายรับ (ถ้ามีฟังก์ชันนี้)
+            // อัปเดตสรุปรายรับ/รายจ่าย
             updateGainLoss();
         });
 
@@ -159,54 +178,85 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }
     }
+
+    // ฟังก์ชันแสดงรายรับจาก LocalStorage
+    function renderIncomes() {
+        incomeList.innerHTML = '';
+        incomes.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'income-item';
+            div.innerHTML = `
+                <div class="income-icon ${item.tag.toLowerCase()}">
+                    <span>${item.tag === 'Salary' ? '&#128188;' : item.tag === 'Freelance' ? '&#128187;' : item.tag === 'Gift' ? '&#127873;' : '&#128176;'}</span>
+                </div>
+                <div class="income-details">
+                    <div class="income-title">${item.tag}</div>
+                    <div class="income-sub">${item.note || ''}</div>
+                    <div class="income-date">${item.date}</div>
+                </div>
+                <div class="income-amount">
+                    <div>${item.amount}</div>
+                    <div class="income-trans">1 Transaction</div>
+                </div>
+                <div class="income-menu">&#8942;</div>
+            `;
+            incomeList.appendChild(div);
+        });
+    }
 });
+
 // Handle side expense form submission and add to expense-list
 document.addEventListener('DOMContentLoaded', function () {
     const sideExpenseForm = document.getElementById('side-expense-form');
-    const sideSaveBtn = document.getElementById('side-save-expense-btn');
     const expenseList = document.getElementById('expense-list');
-    if (sideExpenseForm && sideSaveBtn && expenseList) {
+
+    // โหลดข้อมูลจาก LocalStorage
+    let expenses = JSON.parse(localStorage.getItem('expenses')) || [];
+    renderExpenses();
+
+    if (sideExpenseForm && expenseList) {
         sideExpenseForm.addEventListener('submit', function (e) {
             e.preventDefault();
-            // Use name attributes for more robust selection
+
             const tagSelect = sideExpenseForm.querySelector('select.side-tag-select');
             const amountInput = sideExpenseForm.querySelector('input.side-amount-input');
             const noteInput = sideExpenseForm.querySelector('textarea.side-note-input');
+
             const tag = tagSelect ? tagSelect.value : '';
             const amount = amountInput ? amountInput.value : '';
             const note = noteInput ? noteInput.value : '';
+
             if (tag === 'Select Tag' || !amount) {
                 alert('Please select a tag and enter an amount.');
                 return;
             }
-            // Create new expense item
-            const item = document.createElement('div');
-            item.className = 'expense-item';
-            item.innerHTML = `
-                <div class="expense-icon ${tag.toLowerCase()}">
-                    <span>${tag === 'Home' ? '&#8962;' : tag === 'Food' ? '&#127828;' : tag === 'Shopping' ? '&#128722;' : '&#128176;'}</span>
-                </div>
-                <div class="expense-details">
-                    <div class="expense-title">${tag}</div>
-                    <div class="expense-sub">${note ? note : ''}</div>
-                </div>
-                <div class="expense-amount">
-                    <div>${parseFloat(amount).toFixed(2)}</div>
-                    <div class="expense-trans">1 Transaction</div>
-                </div>
-                <div class="expense-menu">&#8942;</div>
-            `;
-            expenseList.appendChild(item);
+
+            // เก็บวันที่บันทึก
+            const dateSaved = new Date();
+            const dateString = dateSaved.toLocaleDateString('th-TH', {
+                year: 'numeric', month: 'short', day: 'numeric'
+            });
+
+            // เก็บข้อมูลใน Array แล้วบันทึก LocalStorage
+            const expenseData = { tag, amount: parseFloat(amount).toFixed(2), note, date: dateString };
+            expenses.push(expenseData);
+            localStorage.setItem('expenses', JSON.stringify(expenses));
+
+            // แสดงรายการใหม่
+            renderExpenses();
+
             // Reset form
-            if (tagSelect) tagSelect.selectedIndex = 0;
-            if (amountInput) amountInput.value = '';
-            if (noteInput) noteInput.value = '';
+            tagSelect.selectedIndex = 0;
+            amountInput.value = '';
+            noteInput.value = '';
             sideExpenseForm.style.display = 'none';
-            // Update summary after adding new expense
+
+            // Update summary
             updateExpenseSummary();
             updateGainLoss();
         });
-        // Show form when Add Transaction is clicked
+
+        // ปุ่มแสดงฟอร์ม
         const addTransactionBtn = document.querySelector('.side-add-transaction-btn');
         if (addTransactionBtn) {
             addTransactionBtn.addEventListener('click', function () {
@@ -214,7 +264,33 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }
     }
+
+    // ฟังก์ชันแสดงรายการจาก LocalStorage
+    function renderExpenses() {
+        expenseList.innerHTML = '';
+        expenses.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'expense-item';
+            div.innerHTML = `
+                <div class="expense-icon ${item.tag.toLowerCase()}">
+                    <span>${item.tag === 'Home' ? '&#8962;' : item.tag === 'Food' ? '&#127828;' : item.tag === 'Shopping' ? '&#128722;' : '&#128176;'}</span>
+                </div>
+                <div class="expense-details">
+                    <div class="expense-title">${item.tag}</div>
+                    <div class="expense-sub">${item.note || ''}</div>
+                    <div class="expense-date">${item.date}</div>
+                </div>
+                <div class="expense-amount">
+                    <div>${item.amount}</div>
+                    <div class="expense-trans">1 Transaction</div>
+                </div>
+                <div class="expense-menu">&#8942;</div>
+            `;
+            expenseList.appendChild(div);
+        });
+    }
 });
+
 // Real-time update of note to #side-expense-sub, tag to #side-expense-title, and amount to #side-expense-amount
 document.addEventListener('DOMContentLoaded', function() {
     const noteInput = document.querySelector('.side-note-input');
@@ -251,7 +327,7 @@ document.addEventListener('DOMContentLoaded', function() {
             addTransBtn.style.display = 'none';
             form.style.display = 'block';
         });
-        // ซ่อนฟอร์มหลังจาก Submit หรือกด Add More
+        // ซ่อนฟอร์มหลังจาก Submit หรือกด Back
         form.addEventListener('submit', function(e) {
             e.preventDefault();
             form.style.display = 'none';

@@ -813,4 +813,8 @@ h1 {
         flex-direction: column;
         gap: 16px;
     }
+    .filters {
+        gap: 8px;
+        padding: 0 12px;
+    }
 }

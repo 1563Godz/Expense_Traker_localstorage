@@ -1,19 +1,19 @@
 // Dropdown menu
-document.addEventListener('DOMContentLoaded', function () {
-    const userInfo = document.getElementById('userInfo');
-    const dropdownMenu = document.getElementById('dropdownMenu');
+// document.addEventListener('DOMContentLoaded', function () {
+//     const userInfo = document.getElementById('userInfo');
+//     const dropdownMenu = document.getElementById('dropdownMenu');
 
-    userInfo.addEventListener('click', () => {
-        dropdownMenu.classList.toggle('show');
-    });
+//     userInfo.addEventListener('click', () => {
+//         dropdownMenu.classList.toggle('show');
+//     });
 
-    // ปิดเมนูเมื่อคลิกนอกพื้นที่
-    document.addEventListener('click', (e) => {
-        if (!userInfo.contains(e.target) && !dropdownMenu.contains(e.target)) {
-            ddropdownMenu.classList.remove('show');
-        }
-    });
-});
+//     // ปิดเมนูเมื่อคลิกนอกพื้นที่
+//     document.addEventListener('click', (e) => {
+//         if (!userInfo.contains(e.target) && !dropdownMenu.contains(e.target)) {
+//             ddropdownMenu.classList.remove('show');
+//         }
+//     });
+// });
 
 //tabs menu
 document.addEventListener('DOMContentLoaded', function () {
@@ -115,6 +115,288 @@ document.addEventListener("DOMContentLoaded", function () {
     activateTab(tabExpense);
 });
 
+// --- Pagination Variables ---
+let expensePage = 1;
+const expensePerPage = 5;
+let incomePage = 1;
+const incomePerPage = 5;
+
+// ---------------- EXPENSE ----------------
+
+// ฟังก์ชันเพิ่ม expense item ลง UI พร้อมปุ่มลบ
+function addExpenseItemToList(item, idx) {
+    const expenseList = document.getElementById('expense-list');
+    const div = document.createElement('div');
+    div.className = 'expense-item';
+    div.innerHTML = `
+        <div class="expense-icon ${item.tag.toLowerCase()}">
+            <span>${item.tag === 'Home' ? '&#8962;' : item.tag === 'Food' ? '&#127828;' : item.tag === 'Shopping' ? '&#128722;' : '&#128176;'}</span>
+        </div>
+        <div class="expense-details">
+            <div class="expense-title">${item.tag}</div>
+            <div class="expense-sub">${item.note ? item.note : ''}</div>
+            <div class="expense-date">${new Date(item.date).toLocaleString()}</div>
+        </div>
+        <div class="expense-amount">
+            <div>${parseFloat(item.amount).toFixed(2)}</div>
+            <div class="expense-trans">1 Transaction</div>
+        </div>
+        <button class="expense-delete-btn" data-idx="${idx}" title="ลบรายการนี้">
+            <span>&#128465;</span>
+        </button>
+    `;
+    expenseList.appendChild(div);
+
+    // กำหนด event ปุ่มลบ
+    const deleteBtn = div.querySelector('.expense-delete-btn');
+    if (deleteBtn) {
+        deleteBtn.addEventListener('click', function () {
+            let expenses = JSON.parse(localStorage.getItem('expenses') || '[]');
+            expenses.splice(idx, 1);
+            localStorage.setItem('expenses', JSON.stringify(expenses));
+            renderExpenseListFiltered();
+            updateExpenseSummary();
+            updateGainLoss();
+        });
+    }
+}
+
+// ฟังก์ชันแสดงปุ่มแบ่งหน้า
+function renderExpensePagination(totalPages) {
+    const expenseList = document.getElementById('expense-list');
+    let pagination = document.createElement('div');
+    pagination.className = 'expense-pagination';
+    pagination.innerHTML = `
+        <button id="expense-prev" ${expensePage === 1 ? "disabled" : ""}>ก่อนหน้า</button>
+        <span>หน้า ${expensePage} / ${totalPages}</span>
+        <button id="expense-next" ${expensePage === totalPages ? "disabled" : ""}>ถัดไป</button>
+    `;
+    expenseList.appendChild(pagination);
+
+    pagination.querySelector('#expense-prev').onclick = function () {
+        if (expensePage > 1) {
+            expensePage--;
+            renderExpenseListFiltered();
+        }
+    };
+    pagination.querySelector('#expense-next').onclick = function () {
+        if (expensePage < totalPages) {
+            expensePage++;
+            renderExpenseListFiltered();
+        }
+    };
+}
+
+// ฟังก์ชันกรองและแบ่งหน้า expense
+function renderExpenseListFiltered() {
+    const expenseList = document.getElementById('expense-list');
+    let expenses = JSON.parse(localStorage.getItem('expenses') || '[]');
+    // Filter
+    const dateSelect = document.getElementById('date-select');
+    const monthSelect = document.getElementById('month-select');
+    const yearSelect = document.getElementById('year-select');
+    const tagSelect = document.getElementById('tag-select-expense');
+
+    let filtered = expenses;
+
+    // Filter by date
+    if (dateSelect && dateSelect.value && dateSelect.style.display !== 'none') {
+        const now = new Date();
+        filtered = filtered.filter(item => {
+            const itemDate = new Date(item.date);
+            switch (dateSelect.value) {
+                case "Today":
+                    return itemDate.toDateString() === now.toDateString();
+                case "Yesterday":
+                    const yesterday = new Date(now);
+                    yesterday.setDate(now.getDate() - 1);
+                    return itemDate.toDateString() === yesterday.toDateString();
+                case "Last 7 Days":
+                    const sevenDaysAgo = new Date(now);
+                    sevenDaysAgo.setDate(now.getDate() - 7);
+                    return itemDate >= sevenDaysAgo && itemDate <= now;
+                case "Last 30 Days":
+                    const thirtyDaysAgo = new Date(now);
+                    thirtyDaysAgo.setDate(now.getDate() - 30);
+                    return itemDate >= thirtyDaysAgo && itemDate <= now;
+                default: return true;
+            }
+        });
+    }
+    // Filter by month
+    if (monthSelect && monthSelect.value && monthSelect.style.display !== 'none') {
+        const monthIndex = monthSelect.selectedIndex;
+        filtered = filtered.filter(item => {
+            const itemDate = new Date(item.date);
+            return itemDate.getMonth() === monthIndex;
+        });
+    }
+    // Filter by year
+    if (yearSelect && yearSelect.value && yearSelect.style.display !== 'none') {
+        const selectedYear = parseInt(yearSelect.value);
+        filtered = filtered.filter(item => {
+            const itemDate = new Date(item.date);
+            return itemDate.getFullYear() === selectedYear;
+        });
+    }
+    // Filter by Tag
+    if (tagSelect && tagSelect.value && tagSelect.value !== "All Tags") {
+        filtered = filtered.filter(item => item.tag === tagSelect.value);
+    }
+
+    // Pagination
+    const totalPages = Math.max(1, Math.ceil(filtered.length / expensePerPage));
+    if (expensePage > totalPages) expensePage = totalPages;
+
+    const showList = filtered.slice((expensePage - 1) * expensePerPage, expensePage * expensePerPage);
+
+    expenseList.innerHTML = '';
+    showList.forEach((item, idx) => addExpenseItemToList(item, idx + (expensePage - 1) * expensePerPage));
+
+    if (filtered.length > expensePerPage) {
+        renderExpensePagination(totalPages);
+    }
+}
+
+// ---------------- INCOME ----------------
+
+// ฟังก์ชันเพิ่ม income item ลง UI พร้อมปุ่มลบ
+function addIncomeItemToList(item, idx) {
+    const incomeList = document.getElementById('income-list');
+    const div = document.createElement('div');
+    div.className = 'income-item';
+    div.innerHTML = `
+        <div class="income-icon ${item.tag.toLowerCase()}">
+            <span>${item.tag === 'Salary' ? '&#128188;' : item.tag === 'Freelance' ? '&#128187;' : item.tag === 'Gift' ? '&#127873;' : '&#128176;'}</span>
+        </div>
+        <div class="income-details">
+            <div class="income-title">${item.tag}</div>
+            <div class="income-sub">${item.note ? item.note : ''}</div>
+            <div class="income-date">${new Date(item.date).toLocaleString()}</div>
+        </div>
+        <div class="income-amount">
+            <div>${parseFloat(item.amount).toFixed(2)}</div>
+            <div class="income-trans">1 Transaction</div>
+        </div>
+        <div class="income-menu">&#8942;</div>
+        <button class="income-delete-btn" data-idx="${idx}" title="ลบรายการนี้">
+            <span>&#128465;</span>
+        </button>
+    `;
+    incomeList.appendChild(div);
+
+    // กำหนด event ปุ่มลบ
+    const deleteBtn = div.querySelector('.income-delete-btn');
+    if (deleteBtn) {
+        deleteBtn.addEventListener('click', function () {
+            let incomes = JSON.parse(localStorage.getItem('incomes') || '[]');
+            incomes.splice(idx, 1);
+            localStorage.setItem('incomes', JSON.stringify(incomes));
+            renderIncomeListFiltered();
+            updateGainLoss();
+        });
+    }
+}
+
+// ฟังก์ชันแสดงปุ่มแบ่งหน้า
+function renderIncomePagination(totalPages) {
+    const incomeList = document.getElementById('income-list');
+    let pagination = document.createElement('div');
+    pagination.className = 'income-pagination';
+    pagination.innerHTML = `
+        <button id="income-prev" ${incomePage === 1 ? "disabled" : ""}>ก่อนหน้า</button>
+        <span>หน้า ${incomePage} / ${totalPages}</span>
+        <button id="income-next" ${incomePage === totalPages ? "disabled" : ""}>ถัดไป</button>
+    `;
+    incomeList.appendChild(pagination);
+
+    pagination.querySelector('#income-prev').onclick = function () {
+        if (incomePage > 1) {
+            incomePage--;
+            renderIncomeListFiltered();
+        }
+    };
+    pagination.querySelector('#income-next').onclick = function () {
+        if (incomePage < totalPages) {
+            incomePage++;
+            renderIncomeListFiltered();
+        }
+    };
+}
+
+// ฟังก์ชันกรองและแบ่งหน้า income
+function renderIncomeListFiltered() {
+    const incomeList = document.getElementById('income-list');
+    let incomes = JSON.parse(localStorage.getItem('incomes') || '[]');
+    // Filter
+    const dateSelect = document.getElementById('date-select');
+    const monthSelect = document.getElementById('month-select');
+    const yearSelect = document.getElementById('year-select');
+    const tagSelect = document.getElementById('tag-select-income');
+
+    let filtered = incomes;
+
+    // Filter by date
+    if (dateSelect && dateSelect.value && dateSelect.style.display !== 'none') {
+        const now = new Date();
+        filtered = filtered.filter(item => {
+            const itemDate = new Date(item.date);
+            switch (dateSelect.value) {
+                case "Today":
+                    return itemDate.toDateString() === now.toDateString();
+                case "Yesterday":
+                    const yesterday = new Date(now);
+                    yesterday.setDate(now.getDate() - 1);
+                    return itemDate.toDateString() === yesterday.toDateString();
+                case "Last 7 Days":
+                    const sevenDaysAgo = new Date(now);
+                    sevenDaysAgo.setDate(now.getDate() - 7);
+                    return itemDate >= sevenDaysAgo && itemDate <= now;
+                case "Last 30 Days":
+                    const thirtyDaysAgo = new Date(now);
+                    thirtyDaysAgo.setDate(now.getDate() - 30);
+                    return itemDate >= thirtyDaysAgo && itemDate <= now;
+                default: return true;
+            }
+        });
+    }
+    // Filter by month
+    if (monthSelect && monthSelect.value && monthSelect.style.display !== 'none') {
+        const monthIndex = monthSelect.selectedIndex;
+        filtered = filtered.filter(item => {
+            const itemDate = new Date(item.date);
+            return itemDate.getMonth() === monthIndex;
+        });
+    }
+    // Filter by year
+    if (yearSelect && yearSelect.value && yearSelect.style.display !== 'none') {
+        const selectedYear = parseInt(yearSelect.value);
+        filtered = filtered.filter(item => {
+            const itemDate = new Date(item.date);
+            return itemDate.getFullYear() === selectedYear;
+        });
+    }
+    // Filter by Tag
+    if (tagSelect && tagSelect.value && tagSelect.value !== "All Tags") {
+        filtered = filtered.filter(item => item.tag === tagSelect.value);
+    }
+
+    // Pagination
+    const totalPages = Math.max(1, Math.ceil(filtered.length / incomePerPage));
+    if (incomePage > totalPages) incomePage = totalPages;
+
+    const showList = filtered.slice((incomePage - 1) * incomePerPage, incomePage * incomePerPage);
+
+    incomeList.innerHTML = '';
+    showList.forEach((item, idx) => addIncomeItemToList(item, idx + (incomePage - 1) * incomePerPage));
+
+    if (filtered.length > incomePerPage) {
+        renderIncomePagination(totalPages);
+    }
+}
+
+// ----- ADD/SUBMIT FORM -----
+
 // Handle side income form submission and add to income-list
 document.addEventListener('DOMContentLoaded', function () {
     const sideIncomeForm = document.getElementById('side-income-form');
@@ -138,25 +420,20 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
 
-            // สร้างรายการ income ใหม่
-            const item = document.createElement('div');
-            item.className = 'income-item';
-            item.innerHTML = `
-                <div class="income-icon ${tag.toLowerCase()}">
-                    <span>${tag === 'Salary' ? '&#128188;' : tag === 'Freelance' ? '&#128187;' : tag === 'Gift' ? '&#127873;' : '&#128176;'}</span>
-                </div>
-                <div class="income-details">
-                    <div class="income-title">${tag}</div>
-                    <div class="income-sub">${note ? note : ''}</div>
-                </div>
-                <div class="income-amount">
-                    <div>${parseFloat(amount).toFixed(2)}</div>
-                    <div class="income-trans">1 Transaction</div>
-                </div>
-                <div class="income-menu">&#8942;</div>
-            `;
+            // สร้างข้อมูล income พร้อมวันที่
+            const incomeItem = {
+                tag: tag,
+                amount: amount,
+                note: note,
+                date: new Date().toISOString()
+            };
 
-            incomeList.appendChild(item);
+            // อ่านข้อมูลเดิมจาก localStorage แล้วเพิ่มข้อมูลใหม่
+            let incomes = JSON.parse(localStorage.getItem('incomes') || '[]');
+            incomes.push(incomeItem);
+            localStorage.setItem('incomes', JSON.stringify(incomes));
+
+            renderIncomeListFiltered();
 
             // รีเซ็ตฟอร์ม
             if (tagSelect) tagSelect.selectedIndex = 0;
@@ -177,6 +454,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 });
+
 // Handle side expense form submission and add to expense-list
 document.addEventListener('DOMContentLoaded', function () {
     const sideExpenseForm = document.getElementById('side-expense-form');
@@ -185,7 +463,6 @@ document.addEventListener('DOMContentLoaded', function () {
     if (sideExpenseForm && sideSaveBtn && expenseList) {
         sideExpenseForm.addEventListener('submit', function (e) {
             e.preventDefault();
-            // Use name attributes for more robust selection
             const tagSelect = sideExpenseForm.querySelector('select.side-tag-select');
             const amountInput = sideExpenseForm.querySelector('input.side-amount-input');
             const noteInput = sideExpenseForm.querySelector('textarea.side-note-input');
@@ -196,33 +473,33 @@ document.addEventListener('DOMContentLoaded', function () {
                 alert('Please select a tag and enter an amount.');
                 return;
             }
-            // Create new expense item
-            const item = document.createElement('div');
-            item.className = 'expense-item';
-            item.innerHTML = `
-                <div class="expense-icon ${tag.toLowerCase()}">
-                    <span>${tag === 'Home' ? '&#8962;' : tag === 'Food' ? '&#127828;' : tag === 'Shopping' ? '&#128722;' : '&#128176;'}</span>
-                </div>
-                <div class="expense-details">
-                    <div class="expense-title">${tag}</div>
-                    <div class="expense-sub">${note ? note : ''}</div>
-                </div>
-                <div class="expense-amount">
-                    <div>${parseFloat(amount).toFixed(2)}</div>
-                    <div class="expense-trans">1 Transaction</div>
-                </div>
-                <div class="expense-menu">&#8942;</div>
-            `;
-            expenseList.appendChild(item);
+
+            // สร้างข้อมูล expense พร้อมวันที่
+            const expenseItem = {
+                tag: tag,
+                amount: amount,
+                note: note,
+                date: new Date().toISOString()
+            };
+
+            // อ่านข้อมูลเดิมจาก localStorage แล้วเพิ่มข้อมูลใหม่
+            let expenses = JSON.parse(localStorage.getItem('expenses') || '[]');
+            expenses.push(expenseItem);
+            localStorage.setItem('expenses', JSON.stringify(expenses));
+
+            renderExpenseListFiltered();
+
             // Reset form
             if (tagSelect) tagSelect.selectedIndex = 0;
             if (amountInput) amountInput.value = '';
             if (noteInput) noteInput.value = '';
             sideExpenseForm.style.display = 'none';
+
             // Update summary after adding new expense
             updateExpenseSummary();
             updateGainLoss();
         });
+
         // Show form when Add Transaction is clicked
         const addTransactionBtn = document.querySelector('.side-add-transaction-btn');
         if (addTransactionBtn) {
@@ -232,6 +509,39 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 });
+
+// เพิ่ม event listener ให้กับ filter ทุกตัว
+document.addEventListener('DOMContentLoaded', function () {
+    const expenseFilters = [
+        document.getElementById('date-select'),
+        document.getElementById('month-select'),
+        document.getElementById('year-select'),
+        document.getElementById('tag-select-expense')
+    ];
+    expenseFilters.forEach(el => {
+        if (el) el.addEventListener('change', function () {
+            expensePage = 1;
+            renderExpenseListFiltered();
+        });
+    });
+
+    const incomeFilters = [
+        document.getElementById('date-select'),
+        document.getElementById('month-select'),
+        document.getElementById('year-select'),
+        document.getElementById('tag-select-income')
+    ];
+    incomeFilters.forEach(el => {
+        if (el) el.addEventListener('change', function () {
+            incomePage = 1;
+            renderIncomeListFiltered();
+        });
+    });
+
+    renderExpenseListFiltered();
+    renderIncomeListFiltered();
+});
+
 // Real-time update of note to #side-expense-sub, tag to #side-expense-title, and amount to #side-expense-amount
 document.addEventListener('DOMContentLoaded', function() {
     const noteInput = document.querySelector('.side-note-input');
@@ -377,8 +687,71 @@ document.addEventListener('DOMContentLoaded', function() {
   sideDate.textContent = today.toLocaleDateString('TH', options);
 });
 
+// สรุป income/expense/balance สำหรับแต่ละช่วงใน summary-cards
+function updateSummaryCards() {
+    let expenses = JSON.parse(localStorage.getItem('expenses') || '[]');
+    let incomes = JSON.parse(localStorage.getItem('incomes') || '[]');
+    const now = new Date();
 
-// New Total Calculation Function
+    // DAY
+    let expenseDay = 0;
+    let incomeDay = 0;
+    expenses.forEach(item => {
+        if (new Date(item.date).toDateString() === now.toDateString()) {
+            expenseDay += parseFloat(item.amount) || 0;
+        }
+    });
+    incomes.forEach(item => {
+        if (new Date(item.date).toDateString() === now.toDateString()) {
+            incomeDay += parseFloat(item.amount) || 0;
+        }
+    });
+    document.getElementById('income-day').textContent = incomeDay.toFixed(2);
+    document.getElementById('expense-day').textContent = expenseDay.toFixed(2);
+    document.getElementById('balance-day').textContent = (incomeDay - expenseDay).toFixed(2);
+
+    // MONTH
+    let expenseMonth = 0;
+    let incomeMonth = 0;
+    let m = now.getMonth(), y = now.getFullYear();
+    expenses.forEach(item => {
+        const d = new Date(item.date);
+        if (d.getMonth() === m && d.getFullYear() === y) {
+            expenseMonth += parseFloat(item.amount) || 0;
+        }
+    });
+    incomes.forEach(item => {
+        const d = new Date(item.date);
+        if (d.getMonth() === m && d.getFullYear() === y) {
+            incomeMonth += parseFloat(item.amount) || 0;
+        }
+    });
+    document.getElementById('income-month').textContent = incomeMonth.toFixed(2);
+    document.getElementById('expense-month').textContent = expenseMonth.toFixed(2);
+    document.getElementById('balance-month').textContent = (incomeMonth - expenseMonth).toFixed(2);
+
+    // YEAR
+    let expenseYear = 0;
+    let incomeYear = 0;
+    let yy = now.getFullYear();
+    expenses.forEach(item => {
+        const d = new Date(item.date);
+        if (d.getFullYear() === yy) {
+            expenseYear += parseFloat(item.amount) || 0;
+        }
+    });
+    incomes.forEach(item => {
+        const d = new Date(item.date);
+        if (d.getFullYear() === yy) {
+            incomeYear += parseFloat(item.amount) || 0;
+        }
+    });
+    document.getElementById('income-year').textContent = incomeYear.toFixed(2);
+    document.getElementById('expense-year').textContent = expenseYear.toFixed(2);
+    document.getElementById('balance-year').textContent = (incomeYear - expenseYear).toFixed(2);
+}
+
+// เรียกอัปเดต summary cards ทุกครั้งที่เปลี่ยนข้อมูล
 function updateExpenseSummary() {
     const expenseAmountEls = document.querySelectorAll('.expense-amount > div:first-child');
     let total = 0;
@@ -386,12 +759,12 @@ function updateExpenseSummary() {
         const val = parseFloat(el.textContent);
         if (!isNaN(val)) total += val;
     });
-    document.getElementById('amount-day').textContent = total.toFixed(2);
-    document.getElementById('amount-month').textContent = total.toFixed(2);
-    document.getElementById('amount-year').textContent = total.toFixed(2);
+    // document.getElementById('amount-day').textContent = total.toFixed(2);
+    // document.getElementById('amount-month').textContent = total.toFixed(2);
+    // document.getElementById('amount-year').textContent = total.toFixed(2);
+    updateSummaryCards();
 }
 
-// Update Gain / Loss and Current Money
 function updateGainLoss() {
     // Gain
     const incomeAmountEls = document.querySelectorAll('#income-list .income-amount > div:first-child');
@@ -418,10 +791,14 @@ function updateGainLoss() {
     // Update Current Money
     const balanceEl = document.querySelector('.side-balance');
     if (balanceEl) balanceEl.textContent = (totalIncome - totalExpense).toFixed(2);
+
+    updateSummaryCards();
 }
 
-// Run first time when page loads
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', function () {
+    renderExpenseListFiltered();
+    renderIncomeListFiltered();
     updateExpenseSummary();
     updateGainLoss();
+    updateSummaryCards();
 });

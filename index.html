@@ -10,36 +10,72 @@
 </head>
 
 <body>
-    <div class="navbar">
-        <div class="user-info" id="userInfo">
-            <span class="user-icon">&#128100;</span>
-            <div>
-                <div class="user-name">User</div>
-                <div class="user-email">gmail.com</div>
-            </div>
-            <span class="dropdown-icon">&#9660;</span>
-            <div class="dropdown-menu" id="dropdownMenu">
-                <a href="sign_in.html" class="login-btn">เข้าสู่ระบบ</a>
-                <a href="sign_up.html" class="signup-btn">สมัครสมาชิก</a>
-            </div>
-        </div>
-
-    </div>
     <div class="container">
         <div class="main-content">
             <h1>Expense Tracker</h1>
             <div class="summary-cards">
                 <div class="summary-card day">
-                    <div class="amount" id="amount-day"></div>
-                    <div class="label">Day</div>
+                    <div class="summary-top-row">
+                        <div class="summary-income">
+                            <span class="summary-label">Income</span>
+                            <span class="summary-value" id="income-day"></span>
+                        </div>
+                        <div class="summary-expense">
+                            <span class="summary-label">Expense</span>
+                            <span class="summary-value" id="expense-day"></span>
+                        </div>
+                    </div>
+                    <div class="summary-bottom-row">
+                        <div class="summary-date">
+                            <span class="summary-label">Day</span>
+                        </div>
+                        <div class="summary-balance">
+                            <span class="summary-label">Balance</span>
+                            <span class="summary-value" id="balance-day"></span>
+                        </div>
+                    </div>
                 </div>
                 <div class="summary-card month">
-                    <div class="amount" id="amount-month"></div>
-                    <div class="label">Month</div>
+                    <div class="summary-top-row">
+                        <div class="summary-income">
+                            <span class="summary-label">Income</span>
+                            <span class="summary-value" id="income-month"></span>
+                        </div>
+                        <div class="summary-expense">
+                            <span class="summary-label">Expense</span>
+                            <span class="summary-value" id="expense-month"></span>
+                        </div>
+                    </div>
+                    <div class="summary-bottom-row">
+                        <div class="summary-date">
+                            <span class="summary-label">Month</span>
+                        </div>
+                        <div class="summary-balance">
+                            <span class="summary-label">Balance</span>
+                            <span class="summary-value" id="balance-month"></span>
+                        </div>
+                    </div>
                 </div>
                 <div class="summary-card year">
-                    <div class="amount" id="amount-year"></div>
-                    <div class="label">Year</div>
+                    <div class="summary-top-row">
+                        <div class="summary-income">
+                            <span class="summary-label">Income</span>
+                            <span class="summary-value" id="income-year"></span>
+                        </div>
+                        <div class="summary-expense">
+                            <span class="summary-label">Expense</span>
+                            <span class="summary-value" id="expense-year"></span>
+                        </div>
+                    </div>
+                    <div class="summary-bottom-row">
+                        <div class="summary-date">
+                            <span class="summary-label">Year</span>
+                        </div>
+                        <div class="summary-balance">
+                            <span class="summary-label">Balance</span>
+                            <span class="summary-value" id="balance-year"></span>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="tabs">
@@ -85,11 +121,8 @@
                     </select>
                 </div>
             </div>
-            <div class="expense-list" id="expense-list">
-            </div>
-            <div class="income-list" id="income-list">
-            </div>
-
+            <div class="expense-list" id="expense-list"></div>
+            <div class="income-list" id="income-list"></div>
         </div>
         <div class="side-panel">
             <div class="side-header">
@@ -126,7 +159,6 @@
                         <div class="side-expense-sub" id="side-expense-sub">Note</div>
                     </div>
                     <div class="side-expense-amount" id="side-expense-amount">0</div>
-                    <div class="side-expense-menu">&#8942;</div>
                 </div>
                 <form class="side-expense-form" style="display:none;" id="side-expense-form">
                     <div class="side-expense-form-row">
@@ -195,5 +227,4 @@
         </div>
     </div>
 </body>
-
 </html>

@@ -256,6 +256,9 @@ function renderExpenseListFiltered() {
     if (filtered.length > expensePerPage) {
         renderExpensePagination(totalPages);
     }
+
+    renderExpenseListFiltered();
+    renderIncomeListFiltered();
 }
 
 // ---------------- INCOME ----------------
@@ -392,6 +395,9 @@ function renderIncomeListFiltered() {
     if (filtered.length > incomePerPage) {
         renderIncomePagination(totalPages);
     }
+
+    renderExpenseListFiltered();
+    renderIncomeListFiltered();
 }
 
 // ----- ADD/SUBMIT FORM -----
@@ -660,6 +666,9 @@ document.addEventListener('DOMContentLoaded', function () {
     dateSelect.style.display = '';
     monthSelect.style.display = 'none';
     yearSelect.style.display = 'none';
+
+    renderExpenseListFiltered();
+    renderIncomeListFiltered();
 });
 
 // summary-card
@@ -800,5 +809,4 @@ document.addEventListener('DOMContentLoaded', function () {
     updateExpenseSummary();
     updateGainLoss();
     updateSummaryCards();
-
 });

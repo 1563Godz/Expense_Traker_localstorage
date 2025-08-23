@@ -256,9 +256,6 @@ function renderExpenseListFiltered() {
     if (filtered.length > expensePerPage) {
         renderExpensePagination(totalPages);
     }
-
-    renderExpenseListFiltered();
-    renderIncomeListFiltered();
 }
 
 // ---------------- INCOME ----------------
@@ -395,9 +392,6 @@ function renderIncomeListFiltered() {
     if (filtered.length > incomePerPage) {
         renderIncomePagination(totalPages);
     }
-
-    renderExpenseListFiltered();
-    renderIncomeListFiltered();
 }
 
 // ----- ADD/SUBMIT FORM -----

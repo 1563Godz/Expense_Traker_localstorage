@@ -251,17 +251,6 @@ h1 {
     cursor: pointer;
     margin-left: 12px;
 }
-.expense-date {
-    display: none;
-}
-.expense-delete-btn {
-    color: #888;
-    cursor: pointer;
-    border-radius: 10px;
-    padding: 4px 8px;
-    background: #f3f2fd;
-    border: 1px solid #eee;
-}
 
 /* Income List */
 .income-list {
@@ -323,17 +312,6 @@ h1 {
     color: #888;
     cursor: pointer;
     margin-left: 12px;
-}
-.income-date {
-    display: none;
-}
-.income-delete-btn {
-    color: #888;
-    cursor: pointer;
-    border-radius: 10px;
-    padding: 4px 8px;
-    background: #f3f2fd;
-    border: 1px solid #eee;
 }
 
 /* Side Panel */
@@ -463,7 +441,8 @@ h1 {
 }
 .side-expense-menu {
     font-size: 1.2rem;
-    color: #fff;    
+    color: #888;
+    cursor: pointer;
     margin-left: 8px;
 }
 
@@ -522,9 +501,11 @@ h1 {
 }
 .side-income-menu {
     font-size: 1.2rem;
-    color: #fff;    
+    color: #888;
+    cursor: pointer;
     margin-left: 8px;
 }
+
 
 /* Side Expense Header Row Styling */
 .side-expense-header-row {

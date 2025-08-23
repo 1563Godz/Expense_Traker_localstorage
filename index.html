@@ -6,10 +6,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Expense Tracker</title>
     <link rel="stylesheet" href="style.css">
-    <script src="script.js"></script>
+    <script src="script.js" defer></script>
 </head>
 
 <body>
+    <div class="navbar">
+        <div class="user-info" id="userInfo">
+            <span class="user-icon">&#128100;</span>
+            <div>
+                <div class="user-name">User</div>
+                <div class="user-email">gmail.com</div>
+            </div>
+            <span class="dropdown-icon">&#9660;</span>
+            <div class="dropdown-menu" id="dropdownMenu">
+                <a href="sign_in.html" class="login-btn">เข้าสู่ระบบ</a>
+                <a href="sign_up.html" class="signup-btn">สมัครสมาชิก</a>
+            </div>
+        </div>
+
+    </div>
     <div class="container">
         <div class="main-content">
             <h1>Expense Tracker</h1>
@@ -181,8 +196,4 @@
     </div>
 </body>
 
-
 </html>
-
-
-

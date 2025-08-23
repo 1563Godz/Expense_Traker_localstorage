@@ -278,7 +278,6 @@ function addIncomeItemToList(item, idx) {
             <div>${parseFloat(item.amount).toFixed(2)}</div>
             <div class="income-trans">1 Transaction</div>
         </div>
-        <div class="income-menu">&#8942;</div>
         <button class="income-delete-btn" data-idx="${idx}" title="ลบรายการนี้">
             <span>&#128465;</span>
         </button>
@@ -801,4 +800,5 @@ document.addEventListener('DOMContentLoaded', function () {
     updateExpenseSummary();
     updateGainLoss();
     updateSummaryCards();
+
 });

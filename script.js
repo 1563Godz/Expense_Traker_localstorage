@@ -154,6 +154,7 @@ function addExpenseItemToList(item, idx) {
             expenses.splice(idx, 1);
             localStorage.setItem('expenses', JSON.stringify(expenses));
             renderExpenseListFiltered();
+            renderIncomeListFiltered();
             updateExpenseSummary();
             updateGainLoss();
         });
@@ -856,3 +857,4 @@ document.addEventListener('DOMContentLoaded', function () {
     updateGainLoss();
     updateSummaryCards();
 });
+

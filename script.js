@@ -139,7 +139,6 @@ function addExpenseItemToList(item, idx) {
         </div>
         <div class="expense-amount">
             <div>${parseFloat(item.amount).toFixed(2)}</div>
-            <div class="expense-trans">1 Transaction</div>
         </div>
         <button class="expense-delete-btn" data-idx="${idx}" title="ลบรายการนี้">
             <span>&#128465;</span>
@@ -276,7 +275,6 @@ function addIncomeItemToList(item, idx) {
         </div>
         <div class="income-amount">
             <div>${parseFloat(item.amount).toFixed(2)}</div>
-            <div class="income-trans">1 Transaction</div>
         </div>
         <button class="income-delete-btn" data-idx="${idx}" title="ลบรายการนี้">
             <span>&#128465;</span>
@@ -441,7 +439,9 @@ document.addEventListener('DOMContentLoaded', function () {
             sideIncomeForm.style.display = 'none';
 
             // อัปเดตสรุปรายรับ (ถ้ามีฟังก์ชันนี้)
+            updateExpenseSummary();
             updateGainLoss();
+            resetSidePreview();
         });
 
         // แสดงฟอร์มเมื่อคลิก Add Transaction
@@ -497,6 +497,7 @@ document.addEventListener('DOMContentLoaded', function () {
             // Update summary after adding new expense
             updateExpenseSummary();
             updateGainLoss();
+            resetSidePreview();
         });
 
         // Show form when Add Transaction is clicked
@@ -541,9 +542,9 @@ document.addEventListener('DOMContentLoaded', function () {
     renderIncomeListFiltered();
 });
 
-// Real-time update of note to #side-expense-sub, tag to #side-expense-title, and amount to #side-expense-amount
-document.addEventListener('DOMContentLoaded', function() {
-    const noteInput = document.querySelector('.side-note-input');
+// --- Real-time update (Expense) ---
+function setupExpenseRealTimeUpdates() {
+    const noteInput = document.querySelector('#side-expense-form .side-note-input');
     const subDisplay = document.getElementById('side-expense-sub');
     if (noteInput && subDisplay) {
         noteInput.addEventListener('input', function() {
@@ -551,23 +552,74 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    const tagSelect = document.querySelector('.side-tag-select');
+    const tagSelect = document.querySelector('#side-expense-form .side-tag-select');
     const titleDisplay = document.getElementById('side-expense-title');
     if (tagSelect && titleDisplay) {
         tagSelect.addEventListener('change', function() {
-            // Don't show 'Select Tag' as a title
-            titleDisplay.textContent = tagSelect.value === 'Select Tag' ? '' : tagSelect.value;
+            titleDisplay.textContent = tagSelect.value === 'Select Tag' ? 'Select Tag' : tagSelect.value;
         });
     }
 
-    const amountInput = document.querySelector('.side-amount-input');
+    const amountInput = document.querySelector('#side-expense-form .side-amount-input');
     const amountDisplay = document.getElementById('side-expense-amount');
     if (amountInput && amountDisplay) {
         amountInput.addEventListener('input', function() {
             amountDisplay.textContent = amountInput.value;
         });
     }
+}
+
+// --- Real-time update (Income) ---
+function setupIncomeRealTimeUpdates() {
+    const noteInput = document.querySelector('#side-income-form .side-note-input');
+    const subDisplay = document.getElementById('side-income-sub');
+    if (noteInput && subDisplay) {
+        noteInput.addEventListener('input', function() {
+            subDisplay.textContent = noteInput.value;
+        });
+    }
+
+    const tagSelect = document.querySelector('#side-income-form .side-tag-select');
+    const titleDisplay = document.getElementById('side-income-title');
+    if (tagSelect && titleDisplay) {
+        tagSelect.addEventListener('change', function() {
+            titleDisplay.textContent = tagSelect.value === 'Select Tag' ? 'Select Tag' : tagSelect.value;
+        });
+    }
+
+    const amountInput = document.querySelector('#side-income-form .side-amount-input');
+    const amountDisplay = document.getElementById('side-income-amount');
+    if (amountInput && amountDisplay) {
+        amountInput.addEventListener('input', function() {
+            amountDisplay.textContent = amountInput.value;
+        });
+    }
+}
+
+// --- Reset preview function ---
+function resetSidePreview() {
+    const defaults = {
+        'side-expense-title': 'Select Tag',
+        'side-expense-sub': 'Note',
+        'side-expense-amount': '0',
+        'side-income-title': 'Select Tag',
+        'side-income-sub': 'Note',
+        'side-income-amount': '0'
+    };
+
+    Object.keys(defaults).forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = defaults[id];
+    });
+}
+
+// --- Init ---
+document.addEventListener('DOMContentLoaded', function () {
+    setupExpenseRealTimeUpdates();
+    setupIncomeRealTimeUpdates();
 });
+
+
 // Side Expense List Toggle
 document.addEventListener('DOMContentLoaded', function() {
     const addTransBtn = document.querySelector('.side-add-expense-btn');

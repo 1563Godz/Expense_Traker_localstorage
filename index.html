@@ -152,7 +152,7 @@
                 </div>
                 <div class="side-expense-item">
                     <div class="side-expense-icon home">
-                        <span>&#8962;</span>
+                        <span>&#127968;</span>
                     </div>
                     <div class="side-expense-details">
                         <div class="side-expense-title" id="side-expense-title">Select Tag</div>
@@ -162,17 +162,16 @@
                 </div>
                 <form class="side-expense-form" style="display:none;" id="side-expense-form">
                     <div class="side-expense-form-row">
-                        <select class="side-tag-select" name="side-tag-select">
+                        <select class="side-tag-select" name="side-tag-select" id="side-tag-select-expense">
                             <option>Select Tag</option>
                             <option>Home</option>
                             <option>Food</option>
                             <option>Shopping</option>
                             <option>Other</option>
                         </select>
-                        <input type="number" class="side-amount-input" name="side-amount-input" placeholder="Add Amount"
-                            min="0" step="1" />
+                        <input type="number" class="side-amount-input" name="side-amount-input" placeholder="Add Amount" min="0" step="1" id="side-amount-input-expense">
                     </div>
-                    <textarea class="side-note-input" name="side-note-input" placeholder="Note"></textarea>
+                    <textarea class="side-note-input" name="side-note-input" placeholder="Note" id="side-note-input-expense"></textarea>
                     <div class="side-expense-form-actions">
                         <button type="button" class="side-add-more-btn"><span class="add-icon">&#8592;</span>
                             Back</button>
@@ -191,7 +190,7 @@
                 </div>
                 <div class="side-income-item">
                     <div class="side-income-icon home">
-                        <span>&#8962;</span>
+                        <span>&#127968;</span>
                     </div>
                     <div class="side-income-details">
                         <div class="side-income-title" id="side-income-title">Select Tag</div>

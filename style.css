@@ -189,6 +189,31 @@ h1 {
     cursor: pointer;
 }
 
+/* Edit Buttons */
+.expense-edit-btn,
+.income-edit-btn {
+    background: rgb(240, 240, 240);
+    border: none;
+    cursor: pointer;
+    padding: 6px 10px;
+    border-radius: 8px;
+    margin-left: 8px;
+    transition: background 0.2s;
+    vertical-align: middle;
+    display: inline-flex;
+    align-items: center;
+}
+.expense-edit-btn:hover,
+.income-edit-btn:hover {
+    background: #e6f7ff;
+    box-shadow: 0 0 6px #4ca3ff22;
+}
+.expense-edit-btn span,
+.income-edit-btn span {
+    color: #4ca3ff;
+    font-size: 1.2em;
+}
+
 /* Delete Buttons */
 .expense-delete-btn,
 .income-delete-btn {
@@ -873,7 +898,23 @@ h1 {
         gap: 16px;
         justify-content: center;
     }
+
 }
+
+/* Modal styles for edit dialog */
+.modal.hidden { display: none; }
+.modal { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; }
+.modal-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.5); }
+.modal-content { position: relative; background: #fff; padding: 20px; border-radius: 8px; width: 360px; max-width: 95%; box-shadow: 0 8px 24px rgba(0,0,0,0.2); z-index: 1; }
+.modal-content h3 { margin-top: 0; font-size: 1.1rem; }
+.modal-content label { display: block; margin: 8px 0; font-size: 14px; }
+.modal-content input, .modal-content select, .modal-content textarea { width: 100%; padding: 6px 8px; margin-top: 4px; box-sizing: border-box; border: 1px solid #e5e5f7; border-radius: 6px; }
+.modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 12px; }
+.modal-actions button { padding: 8px 12px; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; }
+.modal-actions #edit-expense-save, .modal-actions #edit-income-save { background: #e1f06b; color: #222; transform: scale(1); transition: background 0.5s, transform 0.5s;}
+.modal-actions #edit-expense-cancel, .modal-actions #edit-income-cancel { background: #f3f2fd; color: #222; transform: scale(1); transition: background 0.5s, transform 0.5s;}
+.modal-actions #edit-expense-save:hover, .modal-actions #edit-income-save:hover { background: #d4e24d; transition: 0.5s; transform: scale(1.1); }
+.modal-actions #edit-expense-cancel:hover, .modal-actions #edit-income-cancel:hover { background: #e84c4c; transition: 0.5s; transform: scale(1.1);}
 
 @media (max-width: 800px) {
     .summary-cards {

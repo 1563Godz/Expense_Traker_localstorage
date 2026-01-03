@@ -222,7 +222,70 @@
                     <span class="add-icon">&#43;</span> Add Transaction
                 </button>
             </div>
+                </div>
         </div>
-    </div>
+
+        <!-- Edit Expense Modal -->
+        <div id="edit-expense-modal" class="modal hidden" aria-hidden="true">
+            <div class="modal-overlay" id="edit-expense-overlay"></div>
+            <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="edit-expense-title">
+                <h3 id="edit-expense-title">แก้ไขรายการค่าใช้จ่าย</h3>
+                <form id="edit-expense-form">
+                    <label>Tag
+                        <select id="edit-expense-tag">
+                            <option>Home</option>
+                            <option>Food</option>
+                            <option>Shopping</option>
+                            <option>Other</option>
+                        </select>
+                    </label>
+                    <label>Amount
+                        <input type="number" step="0.01" id="edit-expense-amount" required />
+                    </label>
+                    <label>Note
+                        <textarea id="edit-expense-note"></textarea>
+                    </label>
+                    <label>Date/Time
+                        <input type="datetime-local" id="edit-expense-date" required />
+                    </label>
+                    <div class="modal-actions">
+                        <button type="submit" id="edit-expense-save">บันทึก</button>
+                        <button type="button" id="edit-expense-cancel">ยกเลิก</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
 </body>
 </html>
+
+        <!-- Edit Income Modal -->
+        <div id="edit-income-modal" class="modal hidden" aria-hidden="true">
+            <div class="modal-overlay" id="edit-income-overlay"></div>
+            <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="edit-income-title">
+                <h3 id="edit-income-title">แก้ไขรายการรายรับ</h3>
+                <form id="edit-income-form">
+                    <label>Tag
+                        <select id="edit-income-tag">
+                            <option>Salary</option>
+                            <option>Freelance</option>
+                            <option>Gift</option>
+                            <option>Other</option>
+                        </select>
+                    </label>
+                    <label>Amount
+                        <input type="number" step="0.01" id="edit-income-amount" required />
+                    </label>
+                    <label>Note
+                        <textarea id="edit-income-note"></textarea>
+                    </label>
+                    <label>Date/Time
+                        <input type="datetime-local" id="edit-income-date" required />
+                    </label>
+                    <div class="modal-actions">
+                        <button type="submit" id="edit-income-save">บันทึก</button>
+                        <button type="button" id="edit-income-cancel">ยกเลิก</button>
+                    </div>
+                </form>
+            </div>
+        </div>

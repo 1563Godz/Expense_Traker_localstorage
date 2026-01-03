@@ -130,7 +130,7 @@ function addExpenseItemToList(item, idx) {
     div.className = 'expense-item';
     div.innerHTML = `
         <div class="expense-icon ${item.tag.toLowerCase()}">
-            <span>${item.tag === 'Home' ? '&#8962;' : item.tag === 'Food' ? '&#127828;' : item.tag === 'Shopping' ? '&#128722;' : '&#128176;'}</span>
+            <span>${item.tag === 'Home' ? '🏠' : item.tag === 'Food' ? '&#127828;' : item.tag === 'Shopping' ? '&#128722;' : '&#128176;'}</span>
         </div>
         <div class="expense-details">
             <div class="expense-title">${item.tag}</div>
@@ -140,6 +140,9 @@ function addExpenseItemToList(item, idx) {
         <div class="expense-amount">
             <div>${parseFloat(item.amount).toFixed(2)}</div>
         </div>
+        <button class="expense-edit-btn" data-idx="${idx}" title="แก้ไขรายการนี้">
+            <span>&#128394;</span>
+        </button>
         <button class="expense-delete-btn" data-idx="${idx}" title="ลบรายการนี้">
             <span>&#128465;</span>
         </button>
@@ -157,6 +160,16 @@ function addExpenseItemToList(item, idx) {
             renderIncomeListFiltered();
             updateExpenseSummary();
             updateGainLoss();
+        });
+    }
+
+    // กำหนด event ปุ่มแก้ไข
+    const editBtn = div.querySelector('.expense-edit-btn');
+    if (editBtn) {
+        editBtn.addEventListener('click', function () {
+            let expenses = JSON.parse(localStorage.getItem('expenses') || '[]');
+            const item = expenses[idx];
+            openEditExpenseModal(item, idx);
         });
     }
 }
@@ -277,6 +290,9 @@ function addIncomeItemToList(item, idx) {
         <div class="income-amount">
             <div>${parseFloat(item.amount).toFixed(2)}</div>
         </div>
+        <button class="income-edit-btn" data-idx="${idx}" title="แก้ไขรายการนี้">
+            <span>&#128394;</span>
+        </button>
         <button class="income-delete-btn" data-idx="${idx}" title="ลบรายการนี้">
             <span>&#128465;</span>
         </button>
@@ -290,8 +306,20 @@ function addIncomeItemToList(item, idx) {
             let incomes = JSON.parse(localStorage.getItem('incomes') || '[]');
             incomes.splice(idx, 1);
             localStorage.setItem('incomes', JSON.stringify(incomes));
+            renderExpenseListFiltered();
             renderIncomeListFiltered();
+            updateExpenseSummary();
             updateGainLoss();
+        });
+    }
+
+    // กำหนด event ปุ่มแก้ไข
+    const editBtn = div.querySelector('.income-edit-btn');
+    if (editBtn) {
+        editBtn.addEventListener('click', function () {
+            let incomes = JSON.parse(localStorage.getItem('incomes') || '[]');
+            const item = incomes[idx];
+            openEditIncomeModal(item, idx);
         });
     }
 }
@@ -858,3 +886,147 @@ document.addEventListener('DOMContentLoaded', function () {
     updateSummaryCards();
 });
 
+// --- Edit Expense Modal JS ---
+// Helper: convert ISO string -> datetime-local value "YYYY-MM-DDTHH:MM"
+function isoToLocalDatetime(iso) {
+    if (!iso) return '';
+    const d = new Date(iso);
+    const pad = n => String(n).padStart(2, '0');
+    const yyyy = d.getFullYear();
+    const mm = pad(d.getMonth() + 1);
+    const dd = pad(d.getDate());
+    const hh = pad(d.getHours());
+    const mi = pad(d.getMinutes());
+    return `${yyyy}-${mm}-${dd}T${hh}:${mi}`;
+}
+
+// Open modal and populate fields
+function openEditExpenseModal(item, idx) {
+    const modal = document.getElementById('edit-expense-modal');
+    if (!modal) return;
+    document.getElementById('edit-expense-tag').value = item.tag || 'Other';
+    document.getElementById('edit-expense-amount').value = parseFloat(item.amount) || '';
+    document.getElementById('edit-expense-note').value = item.note || '';
+    document.getElementById('edit-expense-date').value = isoToLocalDatetime(item.date);
+    modal.classList.remove('hidden');
+
+    // attach index to modal for save
+    modal.dataset.editIdx = idx;
+}
+
+// Close modal
+function closeEditExpenseModal() {
+    const modal = document.getElementById('edit-expense-modal');
+    if (!modal) return;
+    modal.classList.add('hidden');
+    delete modal.dataset.editIdx;
+}
+
+// Save handler and wiring
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('edit-expense-form');
+    const modal = document.getElementById('edit-expense-modal');
+    const overlay = document.getElementById('edit-expense-overlay');
+    const cancelBtn = document.getElementById('edit-expense-cancel');
+
+    if (!form || !modal) return;
+
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        const idx = parseInt(modal.dataset.editIdx, 10);
+        if (isNaN(idx)) return closeEditExpenseModal();
+
+        let expenses = JSON.parse(localStorage.getItem('expenses') || '[]');
+        const tag = document.getElementById('edit-expense-tag').value;
+        const amount = document.getElementById('edit-expense-amount').value;
+        const note = document.getElementById('edit-expense-note').value;
+        const dateVal = document.getElementById('edit-expense-date').value;
+        const isoDate = dateVal ? new Date(dateVal).toISOString() : new Date().toISOString();
+
+        // update item (preserve any other fields)
+        expenses[idx] = {
+            ...expenses[idx],
+            tag,
+            amount,
+            note,
+            date: isoDate
+        };
+        localStorage.setItem('expenses', JSON.stringify(expenses));
+
+        closeEditExpenseModal();
+        renderExpenseListFiltered();
+        updateExpenseSummary();
+        updateGainLoss();
+    });
+
+    // Cancel / overlay click closes modal
+    if (cancelBtn) cancelBtn.addEventListener('click', closeEditExpenseModal);
+    if (overlay) overlay.addEventListener('click', closeEditExpenseModal);
+
+    // optional: close on ESC
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && modal && !modal.classList.contains('hidden')) closeEditExpenseModal();
+    });
+});
+
+// --- Edit Income Modal JS ---
+function openEditIncomeModal(item, idx) {
+    const modal = document.getElementById('edit-income-modal');
+    if (!modal) return;
+    document.getElementById('edit-income-tag').value = item.tag || 'Other';
+    document.getElementById('edit-income-amount').value = parseFloat(item.amount) || '';
+    document.getElementById('edit-income-note').value = item.note || '';
+    document.getElementById('edit-income-date').value = isoToLocalDatetime(item.date);
+    modal.classList.remove('hidden');
+    modal.dataset.editIdx = idx;
+}
+
+function closeEditIncomeModal() {
+    const modal = document.getElementById('edit-income-modal');
+    if (!modal) return;
+    modal.classList.add('hidden');
+    delete modal.dataset.editIdx;
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('edit-income-form');
+    const modal = document.getElementById('edit-income-modal');
+    const overlay = document.getElementById('edit-income-overlay');
+    const cancelBtn = document.getElementById('edit-income-cancel');
+
+    if (!form || !modal) return;
+
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        const idx = parseInt(modal.dataset.editIdx, 10);
+        if (isNaN(idx)) return closeEditIncomeModal();
+
+        let incomes = JSON.parse(localStorage.getItem('incomes') || '[]');
+        const tag = document.getElementById('edit-income-tag').value;
+        const amount = document.getElementById('edit-income-amount').value;
+        const note = document.getElementById('edit-income-note').value;
+        const dateVal = document.getElementById('edit-income-date').value;
+        const isoDate = dateVal ? new Date(dateVal).toISOString() : new Date().toISOString();
+
+        incomes[idx] = {
+            ...incomes[idx],
+            tag,
+            amount,
+            note,
+            date: isoDate
+        };
+        localStorage.setItem('incomes', JSON.stringify(incomes));
+
+        closeEditIncomeModal();
+        renderIncomeListFiltered();
+        updateExpenseSummary();
+        updateGainLoss();
+    });
+
+    if (cancelBtn) cancelBtn.addEventListener('click', closeEditIncomeModal);
+    if (overlay) overlay.addEventListener('click', closeEditIncomeModal);
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && modal && !modal.classList.contains('hidden')) closeEditIncomeModal();
+    });
+});
